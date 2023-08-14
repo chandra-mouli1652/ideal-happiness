@@ -97,7 +97,7 @@ app.post("/register/", async (request, response) => {
       response.send("Password is too short");
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const createUserQuery = `INSERT INTO user(username, password,name,gender)
+      const createUserQuery = `INSERT INTO user(username,password,name,gender)
         VALUES('${username}','${hashedPassword}','${name}','${gender}')`;
       await db.run(createUserQuery);
       response.send("User created successfully");
@@ -105,7 +105,7 @@ app.post("/register/", async (request, response) => {
   }
 });
 
-app.post("login/", async (request, response) => {
+app.post("/login/", async (request, response) => {
   const { username, password } = request.body;
   const getUserQuery = `SELECT * FROM user WHERE username='${username}';`;
   const userDbDetails = await db.get(getUserQuery);
@@ -135,7 +135,7 @@ app.get("/user/tweets/feed/", authentication, async (request, response) => {
   const followingPeopleIds = await getFollowingPeopleIdsOfUser(username);
 
   const getTweetsQuery = `SELECT
-      username, tweet, date_time as dateTime
+      username,tweet, date_time as dateTime
       FROM user INNER JOIN tweet ON user.user_id = tweet.user_id
       WHERE
       user.user_id IN (${followingPeopleIds})
@@ -157,7 +157,7 @@ app.get("/user/following/", authentication, async (request, response) => {
   response.send(followingPeople);
 });
 
-app.get("user/followers/", authentication, async (request, response) => {
+app.get("/user/followers/", authentication, async (request, response) => {
   const { username, userId } = request;
   const getFollowersQuery = `SELECT DISTINCT name FROM follower
       INNER JOIN user ON user.user_id = follower.follower_user_id
@@ -208,9 +208,9 @@ app.get(
   async (request, response) => {
     const { tweetId } = request.params;
     const getRepliedQuery = `SELECT name,reply
-        FROM user INNER JOIN reply ON user.user_id = reply.user_id
-        WHERE tweet_id = '${tweetId}';
-        `;
+    FROM user INNER JOIN reply ON user.user_id = reply.user_id
+    WHERE tweet_id = '${tweetId}';
+    `;
     const repliedUsers = await db.all(getRepliedQuery);
     response.send({ replies: repliedUsers });
   }
